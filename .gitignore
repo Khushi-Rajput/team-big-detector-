@@ -1,0 +1,34 @@
+# Python virtual environments
+venv/
+Server/venv/
+.venv/
+env/
+
+# Environment files
+.env
+Server/.env
+*.env
+
+# SQLite databases
+*.db
+Server/*.db
+*.sqlite
+*.sqlite3
+
+# Uploads directory
+uploads/
+Server/uploads/
+Server/uploads/*
+!Server/uploads/.gitkeep
+
+# Python cache
+__pycache__/
+Server/__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

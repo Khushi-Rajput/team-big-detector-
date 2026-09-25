@@ -56,18 +56,47 @@ export function initUploadExperience(dashboardInstance) {
     if (sampleDemoBtn) {
         sampleDemoBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const mockFile = new File(["sample resume content"], "Alex_Morgan_Senior_Software_Engineer_Resume.pdf", { type: "application/pdf" });
+            const sampleResumeText = `ALEX MORGAN
+Senior Full Stack Software Engineer
+Email: alex.morgan@domain.com | Phone: (555) 382-9014 | Location: San Francisco, CA
+LinkedIn: linkedin.com/in/alexmorgan | GitHub: github.com/alexmorgan
+
+SUMMARY
+Results-driven Software Engineer with 6+ years of experience architecting resilient cloud platforms, high-throughput microservices, and reactive frontend architectures. Proven track record leading cross-functional teams to reduce infrastructure latency by 38% and accelerate release velocity.
+
+EXPERIENCE
+Senior Software Engineer | TechScale Inc. | 2022 - Present
+- Architected 18+ high-throughput REST and GraphQL microservices in Node.js & TypeScript, cutting p99 API response latency by 38% for 450,000 MAUs.
+- Refactored PostgreSQL indexing strategies and implemented Redis multi-tier caching, reducing database server load by 54% during peak sales traffic.
+- Spearheaded Next.js migration and asset optimization pipelines, elevating Google Core Web Vitals (LCP) from 3.8s to 1.1s and boosting conversion by 14%.
+- Led automated test coverage expansion with Jest and Cypress to 88%.
+
+Software Engineer | CloudSphere Solutions | 2019 - 2022
+- Developed scalable backend services using Python, Flask, and PostgreSQL for enterprise client management.
+- Built containerized CI/CD pipelines with Docker and GitHub Actions, slashing deployment cycle times by 45%.
+- Integrated AWS S3 and Lambda serverless functions handling 2TB+ weekly file processing.
+
+EDUCATION
+Bachelor of Science in Computer Science | University of California, Berkeley | 2015 - 2019
+
+TECHNICAL SKILLS
+Languages: TypeScript, Python, JavaScript, SQL, HTML5, CSS3, Bash
+Frontend: React, Next.js, Redux, Tailwind CSS
+Backend: Node.js, Express, Flask, GraphQL, REST APIs
+Databases & Cloud: PostgreSQL, Redis, MongoDB, AWS, Docker, Kubernetes, CI/CD, Git`;
+
+            const mockFile = new File([sampleResumeText], "Alex_Morgan_Senior_Software_Engineer_Resume.txt", { type: "text/plain" });
             handleFileUpload(mockFile);
         });
     }
 
     async function handleFileUpload(file) {
         // Validate file type
-        const validExtensions = ['.pdf', '.docx', '.doc'];
+        const validExtensions = ['.pdf', '.docx', '.doc', '.txt'];
         const isExtensionValid = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
 
         if (!isExtensionValid) {
-            alert('Please upload a valid resume file in PDF, DOC, or DOCX format.');
+            alert('Please upload a valid resume file in PDF, TXT, DOC, or DOCX format.');
             return;
         }
 
