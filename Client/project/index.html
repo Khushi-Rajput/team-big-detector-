@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Production-grade AI Resume Analyzer. Check ATS compatibility, detect missing keywords, optimize bullet points, and get actionable recommendations.">
+    <title>AI Resume Analyzer | Precision ATS Scoring & Career Insights</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;850&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- ======================================================================
+         Sticky Frosted Navigation Bar
+         ====================================================================== -->
+    <header class="site-header">
+        <div class="container navbar">
+            <a href="#home" class="brand" aria-label="AI Resume Analyzer Home">
+                <div class="brand-icon">AI</div>
+                <div class="brand-text">Resume<span>Analyzer</span></div>
+            </a>
+
+            <nav class="nav-menu" aria-label="Main Navigation">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#upload" class="nav-link">Upload</a>
+                <a href="#analysis" class="nav-link">Dashboard</a>
+                <a href="#before-after" class="nav-link">Optimizer</a>
+                <a href="#match-jd" class="nav-link">Match JD</a>
+            </nav>
+
+            <div class="nav-actions">
+                <a href="login.html" class="btn btn-ghost">Sign In</a>
+                <a href="#upload" class="btn btn-primary">Analyze Resume Free</a>
+                <button class="mobile-toggle" id="mobileToggle" aria-label="Open mobile navigation menu">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+    <div class="mobile-drawer" id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
+        <div class="drawer-header">
+            <div class="brand">
+                <div class="brand-icon">AI</div>
+                <div class="brand-text">Resume<span>Analyzer</span></div>
+            </div>
+            <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="Close navigation menu">✕</button>
+        </div>
+        <div class="drawer-menu">
+            <a href="#home" class="drawer-link">Home</a>
+            <a href="#features" class="drawer-link">Features</a>
+            <a href="#how-it-works" class="drawer-link">How It Works</a>
+            <a href="#upload" class="drawer-link">Upload Resume</a>
+            <a href="#analysis" class="drawer-link">Live Dashboard</a>
+            <a href="#before-after" class="drawer-link">Bullet Optimizer</a>
+            <a href="#match-jd" class="drawer-link">Job Description Matcher</a>
+            <a href="#about" class="drawer-link">About System</a>
+        </div>
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:0.75rem;">
+            <a href="login.html" class="btn btn-secondary">Sign In to Account</a>
+            <a href="#upload" class="btn btn-primary">Start Instant Scan</a>
+        </div>
+    </div>
+
+    <!-- ======================================================================
+         Hero Section: High-Converting Headline + Interactive ATS Scanner HUD
+         ====================================================================== -->
+    <section class="section hero-section" id="home">
+        <div class="container hero-grid">
+            
+            <!-- Hero Left Side -->
+            <div class="hero-content">
+                <div class="pill-badge">
+                    <span class="sparkle">✦</span>
+                    AI Engine v2.6 • ATS 2026 Compatible
+                </div>
+
+                <h1 class="hero-title">
+                    Turn Your Resume Into Your <span class="gradient-text">Competitive Advantage.</span>
+                </h1>
+
+                <p class="hero-desc">
+                    Scan your resume with AI, uncover hidden ATS parsing flaws, benchmark against 120,000+ hired engineers, and get quantifiable bullet improvements before you apply.
+                </p>
+
+                <div class="hero-cta-group">
+                    <a href="#upload" class="btn btn-primary">
+                        Analyze My Resume Free →
+                    </a>
+                    <a href="#analysis" class="btn btn-secondary">
+                        View Interactive Demo
+                    </a>
+                </div>
+
+                <div class="hero-trust-bar">
+                    <div class="trust-item">
+                        <span class="trust-number">99.4%</span>
+                        <span class="trust-label">ATS Parsing Accuracy</span>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-number">120k+</span>
+                        <span class="trust-label">Resumes Analyzed</span>
+                    </div>
+                    <div class="trust-item">
+                        <span class="trust-number">&lt; 1.2s</span>
+                        <span class="trust-label">Instant Scan Latency</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Right Side: Interactive ATS Scanner Machine & Diagnostic HUD -->
+            <div class="hero-visual-wrapper">
+                <div class="ats-scanner-machine" id="atsScannerMachine" aria-label="Interactive ATS Scanner Demo">
+                    
+                    <!-- Top Assembly: Instrument Tower + Scanner Bed -->
+                    <div class="machine-top-assembly">
+                        
+                        <!-- Left Instrument Tower: RESUME GRADER -->
+                        <div class="instrument-tower">
+                            <div class="tower-header">
+                                <span class="tower-title">ATS SYSTEM</span>
+                                <span class="tower-subtitle">RESUME GRADER</span>
+                            </div>
+
+                            <!-- Analog Speedometer Dial -->
+                            <div class="analog-dial-wrapper">
+                                <svg class="dial-svg" viewBox="0 0 86 52">
+                                    <path d="M 12,44 A 32,32 0 0,1 74,44" fill="none" stroke="#334155" stroke-width="6" stroke-linecap="round" />
+                                    <path d="M 12,44 A 32,32 0 0,1 62,18" fill="none" stroke="url(#dialGrad)" stroke-width="6" stroke-linecap="round" />
+                                    <!-- Needle -->
+                                    <line id="dialNeedle" class="dial-needle" x1="43" y1="44" x2="60" y2="20" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round" />
+                                    <circle class="dial-center-dot" cx="43" cy="44" r="3.5" />
+                                    <defs>
+                                        <linearGradient id="dialGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#38bdf8" />
+                                            <stop offset="60%" stop-color="#10b981" />
+                                            <stop offset="100%" stop-color="#f59e0b" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+
+                            <!-- Live Heartbeat ECG Monitor -->
+                            <div class="ecg-screen" aria-hidden="true">
+                                <div class="ecg-grid-lines"></div>
+                                <svg class="ecg-pulse-svg" viewBox="0 0 100 48" preserveAspectRatio="none">
+                                    <path class="ecg-path" d="M 0,24 L 20,24 L 28,10 L 34,38 L 40,8 L 48,32 L 54,24 L 100,24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" />
+                                </svg>
+                            </div>
+
+                            <!-- Diagnostic LEDs -->
+                            <div class="status-leds">
+                                <div class="led led-green" title="Parser Active"></div>
+                                <div class="led led-amber" title="Metrics Calibrated"></div>
+                                <div class="led led-blue" title="AI Synthesizer Ready"></div>
+                            </div>
+
+                            <!-- Printer Receipt Output Strip -->
+                            <div class="receipt-strip-container">
+                                <div class="receipt-strip">
+                                    <span>ATS: PASS [94%]</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Scanner Bed & High-Fidelity Resume Document -->
+                        <div class="scanner-bed">
+                            <!-- Scanning Laser Beam -->
+                            <div class="scanner-laser-beam"></div>
+                            <div class="scanner-laser-glow"></div>
+
+                            <!-- Rendered Resume Sheet -->
+                            <div class="document-sheet">
+                                <div class="doc-header">
+                                    <div class="doc-name">Taylor Foster</div>
+                                    <div class="doc-title">Certified Project Management Professional</div>
+                                    <div class="doc-contacts">taylor.foster@domain.com • +1 (555) 234-8901 • San Francisco, CA</div>
+                                </div>
+
+                                <div class="doc-section">
+                                    <div class="doc-sec-title">
+                                        Summary
+                                        <span class="badge">96% Matched</span>
+                                    </div>
+                                    <p class="doc-text">
+                                        Strategic technical leader with 7+ years delivering complex enterprise software. Proven ability to scale cloud infrastructures while cutting operational waste.
+                                    </p>
+                                </div>
+
+                                <div class="doc-section">
+                                    <div class="doc-sec-title">
+                                        Technical Stack
+                                        <span class="badge">12 Verified</span>
+                                    </div>
+                                    <div style="display:flex; flex-wrap:wrap; gap:0.25rem;">
+                                        <span class="highlight-pill hl-blue">Python</span>
+                                        <span class="highlight-pill hl-purple">TypeScript</span>
+                                        <span class="highlight-pill hl-green">AWS Cloud</span>
+                                        <span class="highlight-pill hl-blue">Docker</span>
+                                        <span class="highlight-pill hl-green">PostgreSQL</span>
+                                    </div>
+                                </div>
+
+                                <div class="doc-section" style="margin-bottom:0;">
+                                    <div class="doc-sec-title">
+                                        Key Achievements
+                                        <span class="badge">Metrics Quantified</span>
+                                    </div>
+                                    <p class="doc-text">
+                                        • Architected distributed caching layer, <span class="highlight-pill hl-green">slashing p99 API latency by 38%</span>.<br>
+                                        • Led cross-functional squad of 11 engineers to <span class="highlight-pill hl-purple">accelerate sprint velocity by 24%</span>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Diagnostic Readout Console -->
+                    <div class="machine-bottom-console">
+                        <div class="console-status-row">
+                            <div class="console-status-left">
+                                <span class="console-pulse-indicator"></span>
+                                <span>Parsed 100% of resume using industry-leading ATS</span>
+                            </div>
+                            <span class="console-score-pill" id="consoleScore">88/100</span>
+                        </div>
+
+                        <div class="console-progress-track">
+                            <div class="console-progress-bar" id="consoleProgressBar"></div>
+                        </div>
+
+                        <div class="console-badge-row">
+                            <div class="console-badge pass">✓ Clean UTF-8 Text</div>
+                            <div class="console-badge pass">✓ Standard Headers</div>
+                            <div class="console-badge pass">✓ Quantified Metrics</div>
+                            <div class="console-badge">✦ ATS Syntax Verified</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Features Section (Modern Bento Grid Showcase)
+         ====================================================================== -->
+    <section class="section features-section" id="features">
+        <div class="container">
+            <div class="section-header">
+                <div class="pill-badge">Precision Architecture</div>
+                <h2 class="section-title">
+                    Engineered to Beat the <span class="gradient-text">Hiring Filter.</span>
+                </h2>
+                <p class="section-subtitle">
+                    Modern Applicant Tracking Systems discard over 70% of resumes before a human recruiter even opens the file. Our multi-agent AI system fixes that.
+                </p>
+            </div>
+
+            <div class="bento-grid">
+                
+                <!-- Card 1: ATS Compatibility (Span 2) -->
+                <div class="bento-card span-2">
+                    <div class="bento-icon-box">📊</div>
+                    <h3 class="bento-title">ATS Compatibility Engine</h3>
+                    <p class="bento-desc">
+                        Simulates commercial ATS parsers (Workday, Greenhouse, Lever, Taleo). Evaluates section hierarchy, font parseability, contact encoding, and ensures zero silent parsing errors.
+                    </p>
+                    <div class="mini-demo-wrapper">
+                        <div class="mini-score-bar-group">
+                            <div>
+                                <div class="mini-score-row">
+                                    <span>Parser Compliance</span>
+                                    <span>98%</span>
+                                </div>
+                                <div class="mini-bar-track">
+                                    <div class="mini-bar-fill fill-emerald" style="width: 98%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mini-score-row">
+                                    <span>Section Hierarchy</span>
+                                    <span>95%</span>
+                                </div>
+                                <div class="mini-bar-track">
+                                    <div class="mini-bar-fill fill-indigo" style="width: 95%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="mini-score-row">
+                                    <span>Chronological Flow</span>
+                                    <span>92%</span>
+                                </div>
+                                <div class="mini-bar-track">
+                                    <div class="mini-bar-fill fill-indigo" style="width: 92%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Keyword & Skill Gap -->
+                <div class="bento-card">
+                    <div class="bento-icon-box">🔍</div>
+                    <h3 class="bento-title">Skill & Keyword Gap</h3>
+                    <p class="bento-desc">
+                        Tokenizes your experience against millions of active job listings to highlight critical tech keywords missing from your bullets.
+                    </p>
+                    <div class="mini-demo-wrapper">
+                        <div class="tag-cloud">
+                            <span class="tag-chip matched">✓ TypeScript</span>
+                            <span class="tag-chip matched">✓ Next.js</span>
+                            <span class="tag-chip matched">✓ AWS S3</span>
+                            <span class="tag-chip missing">+ Kafka</span>
+                            <span class="tag-chip missing">+ System Design</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Quantified Impact -->
+                <div class="bento-card">
+                    <div class="bento-icon-box">🎯</div>
+                    <h3 class="bento-title">Quantified Impact Scorer</h3>
+                    <p class="bento-desc">
+                        Checks every bullet point against Google's XYZ formula (Accomplished [X], measured by [Y], by doing [Z]).
+                    </p>
+                    <div class="mini-demo-wrapper">
+                        <div style="font-size:0.75rem; color:var(--text-secondary); line-height:1.5;">
+                            <strong>Formula Detected:</strong><br>
+                            <span style="color:var(--success); font-weight:700;">85% Action Verbs</span> • 
+                            <span style="color:var(--primary); font-weight:700;">4 Numeric Metrics</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Job Description Matching (Span 2) -->
+                <div class="bento-card span-2">
+                    <div class="bento-icon-box">⚡</div>
+                    <h3 class="bento-title">Contextual Job Description Matcher</h3>
+                    <p class="bento-desc">
+                        Paste any target job description. The AI creates a tailored gap matrix showing exactly what skills, certifications, and domain patterns you need to incorporate to get shortlisted.
+                    </p>
+                    <div class="mini-demo-wrapper" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:0.875rem; font-weight:700; color:var(--text-primary);">Stripe Staff Engineer Match</div>
+                            <div style="font-size:0.75rem; color:var(--text-muted);">8 of 9 Critical Requirements Satisfied</div>
+                        </div>
+                        <span class="pill-badge" style="margin-bottom:0; background:var(--success-light); color:var(--success); border-color:var(--success-border);">
+                            89% Compatibility
+                        </span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         How It Works (Connected Timeline)
+         ====================================================================== -->
+    <section class="section how-it-works-section" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <div class="pill-badge">Workflow</div>
+                <h2 class="section-title">
+                    Four Steps to an <span class="gradient-text">Interview-Ready</span> Resume.
+                </h2>
+                <p class="section-subtitle">
+                    Fast, automated, and mathematically verified against modern recruiter screening algorithms.
+                </p>
+            </div>
+
+            <div class="timeline-steps">
+                <div class="timeline-step-card">
+                    <div class="step-number-bubble">01</div>
+                    <h4 class="step-card-title">Upload Document</h4>
+                    <p class="step-card-desc">
+                        Drop your PDF or DOCX file. Our engine securely parses the raw UTF-8 text layer and structural headers.
+                    </p>
+                </div>
+
+                <div class="timeline-step-card">
+                    <div class="step-number-bubble">02</div>
+                    <h4 class="step-card-title">AI Deep Scan</h4>
+                    <p class="step-card-desc">
+                        Semantic AI models tokenize keywords, verify chronological timelines, and assess formatting compliance.
+                    </p>
+                </div>
+
+                <div class="timeline-step-card">
+                    <div class="step-number-bubble">03</div>
+                    <h4 class="step-card-title">Interactive Audit</h4>
+                    <p class="step-card-desc">
+                        Review your multidimensional score breakdown, skill gap lists, and strengths vs weaknesses diagnostics.
+                    </p>
+                </div>
+
+                <div class="timeline-step-card">
+                    <div class="step-number-bubble">04</div>
+                    <h4 class="step-card-title">Optimize & Apply</h4>
+                    <p class="step-card-desc">
+                        Use one-click bullet point suggestions and tailored keyword insertions to pass applicant filters with confidence.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Resume Upload Section (Interactive Dropzone)
+         ====================================================================== -->
+    <section class="section upload-section" id="upload">
+        <div class="container">
+            <div class="section-header">
+                <div class="pill-badge">Start Now</div>
+                <h2 class="section-title">
+                    Analyze Your Resume <span class="gradient-text">In Seconds.</span>
+                </h2>
+                <p class="section-subtitle">
+                    Upload your current resume to receive a comprehensive diagnostic report.
+                </p>
+            </div>
+
+            <div class="upload-card-container">
+                <div class="dropzone" id="resumeDropzone">
+                    <input type="file" id="resumeFileInput" class="file-input-hidden" accept=".pdf,.doc,.docx" aria-label="Upload resume file">
+                    <div class="dropzone-icon">📄</div>
+                    <h3 class="dropzone-title">Drag & drop your resume here</h3>
+                    <p class="dropzone-subtitle">Supported formats: PDF, DOCX, or DOC (Max 10MB)</p>
+                    <button type="button" class="btn btn-primary" onclick="document.getElementById('resumeFileInput').click()">
+                        Select Resume File
+                    </button>
+                </div>
+
+                <div class="upload-quick-actions">
+                    <span style="font-size:0.8125rem; color:var(--text-muted);">Want an instant demo?</span>
+                    <button type="button" class="btn-sample-demo" id="btnSampleDemo">
+                        ⚡ Test with Sample Senior Engineer Resume (One-Click)
+                    </button>
+                </div>
+
+                <!-- Multi-Stage Upload & AI Processing Box -->
+                <div class="upload-processing-box" id="uploadProcessingBox">
+                    <div class="processing-header">
+                        <span>Analyzing Document with AI...</span>
+                        <span id="processingPercent" style="color:var(--primary); font-weight:700;">0%</span>
+                    </div>
+                    <div class="processing-progress-track">
+                        <div class="processing-progress-fill" id="processingProgressFill"></div>
+                    </div>
+                    <div class="processing-status-msg" id="processingStatusMsg">
+                        <span class="spinner-icon"></span> Initializing parser pipeline...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Interactive Live Analysis Dashboard
+         ====================================================================== -->
+    <section class="section dashboard-section" id="analysis">
+        <div class="container">
+            <div class="section-header">
+                <div class="pill-badge">Live Dashboard</div>
+                <h2 class="section-title">
+                    Comprehensive <span class="gradient-text">Resume Diagnostic Report.</span>
+                </h2>
+                <p class="section-subtitle">
+                    Explore granular metrics, ATS compliance checks, detected skills, and actionable recommendations.
+                </p>
+            </div>
+
+            <div class="dashboard-container">
+                
+                <!-- Dashboard Top Bar -->
+                <div class="dashboard-topbar">
+                    <div class="candidate-meta">
+                        <h3 id="dashCandidateName">Alex Morgan</h3>
+                        <p id="dashCandidateRole">Senior Full Stack Software Engineer • Demo Profile</p>
+                    </div>
+                    <div class="dashboard-actions">
+                        <a href="#before-after" class="btn btn-secondary" style="font-size:0.8125rem; padding:0.5rem 1rem;">
+                            Optimize Bullets →
+                        </a>
+                        <a href="#upload" class="btn btn-primary" style="font-size:0.8125rem; padding:0.5rem 1rem;">
+                            Upload Another Resume
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Circular Radial Score Cards Row -->
+                <div class="score-cards-grid">
+                    
+                    <!-- Card 1: Overall Score -->
+                    <div class="score-metric-card">
+                        <div class="radial-score-box">
+                            <svg class="radial-score-svg" viewBox="0 0 80 80">
+                                <circle class="radial-bg-circle" cx="40" cy="40" r="36" />
+                                <circle class="radial-progress-circle" id="dashOverallCircle" cx="40" cy="40" r="36" />
+                            </svg>
+                            <div class="radial-score-number">
+                                <span id="dashOverallScore">0</span>
+                                <small>/100</small>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <h4>Overall Score</h4>
+                            <span class="status-badge" style="background:var(--success-light); color:var(--success);">Strong Profile</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: ATS Score -->
+                    <div class="score-metric-card">
+                        <div class="radial-score-box">
+                            <svg class="radial-score-svg" viewBox="0 0 80 80">
+                                <circle class="radial-bg-circle" cx="40" cy="40" r="36" />
+                                <circle class="radial-progress-circle" id="dashAtsCircle" cx="40" cy="40" r="36" stroke="var(--success)" />
+                            </svg>
+                            <div class="radial-score-number">
+                                <span id="dashAtsScore">0</span>
+                                <small>%</small>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <h4>ATS Compatibility</h4>
+                            <span class="status-badge" style="background:var(--success-light); color:var(--success);">High Parseability</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Keyword Match -->
+                    <div class="score-metric-card">
+                        <div class="radial-score-box">
+                            <svg class="radial-score-svg" viewBox="0 0 80 80">
+                                <circle class="radial-bg-circle" cx="40" cy="40" r="36" />
+                                <circle class="radial-progress-circle" id="dashKeywordsCircle" cx="40" cy="40" r="36" stroke="var(--info)" />
+                            </svg>
+                            <div class="radial-score-number">
+                                <span id="dashKeywordsScore">0</span>
+                                <small>%</small>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <h4>Keyword Density</h4>
+                            <span class="status-badge" style="background:var(--info-light); color:var(--info);">Well Aligned</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4: Skills Match -->
+                    <div class="score-metric-card">
+                        <div class="radial-score-box">
+                            <svg class="radial-score-svg" viewBox="0 0 80 80">
+                                <circle class="radial-bg-circle" cx="40" cy="40" r="36" />
+                                <circle class="radial-progress-circle" id="dashSkillsCircle" cx="40" cy="40" r="36" stroke="#8b5cf6" />
+                            </svg>
+                            <div class="radial-score-number">
+                                <span id="dashSkillsScore">0</span>
+                                <small>%</small>
+                            </div>
+                        </div>
+                        <div class="score-details">
+                            <h4>Skills Match</h4>
+                            <span class="status-badge" style="background:#ede9fe; color:#6d28d9;">12 Verified</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tabs Navigation Bar -->
+                <div class="dashboard-tabs-nav" role="tablist">
+                    <button class="dashboard-tab-btn active" data-tab="ats" role="tab" aria-selected="true">
+                        ATS Compliance Check
+                    </button>
+                    <button class="dashboard-tab-btn" data-tab="skills" role="tab" aria-selected="false">
+                        Skills & Keyword Gaps
+                    </button>
+                    <button class="dashboard-tab-btn" data-tab="insights" role="tab" aria-selected="false">
+                        Strengths & Weaknesses
+                    </button>
+                    <button class="dashboard-tab-btn" data-tab="recommendations" role="tab" aria-selected="false">
+                        AI Recommendations
+                    </button>
+                    <button class="dashboard-tab-btn" data-tab="careers" role="tab" aria-selected="false">
+                        Career Matches
+                    </button>
+                </div>
+
+                <!-- Tab 1: ATS Compliance -->
+                <div class="tab-panel-content active" id="tab-ats" role="tabpanel">
+                    <div class="ats-checklist-grid" id="atsChecklistContainer"></div>
+                </div>
+
+                <!-- Tab 2: Skills & Keywords -->
+                <div class="tab-panel-content" id="tab-skills" role="tabpanel">
+                    <div class="skills-matrix-split">
+                        <div class="matrix-column">
+                            <h5>Verified Skills Detected</h5>
+                            <div class="skills-pill-deck" id="detectedSkillsList"></div>
+                        </div>
+                        <div class="matrix-column">
+                            <h5>High-Priority Keyword Gaps</h5>
+                            <div class="keyword-gap-list" id="missingKeywordsList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Strengths & Weaknesses -->
+                <div class="tab-panel-content" id="tab-insights" role="tabpanel">
+                    <div class="strengths-weaknesses-split">
+                        <div class="matrix-column">
+                            <h5 style="color:var(--success);">Key Strengths</h5>
+                            <div class="insight-card-deck" id="strengthsList"></div>
+                        </div>
+                        <div class="matrix-column">
+                            <h5 style="color:var(--warning);">Areas to Improve</h5>
+                            <div class="insight-card-deck" id="weaknessesList"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: AI Recommendations -->
+                <div class="tab-panel-content" id="tab-recommendations" role="tabpanel">
+                    <div class="recommendation-list" id="recommendationsList"></div>
+                </div>
+
+                <!-- Tab 5: Career Matches -->
+                <div class="tab-panel-content" id="tab-careers" role="tabpanel">
+                    <div class="career-grid" id="careerMatchesContainer"></div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Before / After Resume Bullet Optimizer
+         ====================================================================== -->
+    <section class="section before-after-section" id="before-after">
+        <div class="container">
+            <div class="section-header">
+                <div class="pill-badge">Transformation</div>
+                <h2 class="section-title">
+                    See the Difference: <span class="gradient-text">Weak vs. AI-Optimized.</span>
+                </h2>
+                <p class="section-subtitle">
+                    Transform vague task descriptions into high-impact, quantifiable achievements using the Google XYZ formula.
+                </p>
+            </div>
+
+            <div class="optimizer-container">
+                <div class="optimizer-nav" id="optimizerNav"></div>
+
+                <div class="comparison-grid">
+                    
+                    <!-- Left: Before -->
+                    <div class="comparison-card before">
+                        <div class="comp-badge weak">✕ Before (Weak Bullet)</div>
+                        <div class="comp-text" id="optimizerBeforeText"></div>
+                        <div class="comp-footer">
+                            <span style="color:var(--danger); font-weight:600;">Lacks measurable metrics</span>
+                            <span style="color:var(--text-light);">Passivity score: High</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: After -->
+                    <div class="comparison-card after">
+                        <div class="comp-badge strong">✓ After (AI-Enhanced)</div>
+                        <div class="comp-text" id="optimizerAfterText"></div>
+                        <div class="comp-footer">
+                            <span class="metric-pill" id="optimizerMetricPill"></span>
+                            <button type="button" class="btn btn-secondary" id="optimizerCopyBtn" style="font-size:0.75rem; padding:0.4rem 0.85rem;">
+                                Copy Bullet
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Job Description Matching Showcase
+         ====================================================================== -->
+    <section class="section jd-match-section" id="match-jd">
+        <div class="container">
+            <div class="section-header">
+                <div class="pill-badge">Target Role Alignment</div>
+                <h2 class="section-title">
+                    Match Your Resume With <span class="gradient-text">Any Job Description.</span>
+                </h2>
+                <p class="section-subtitle">
+                    Paste a job posting or select a top tech preset to verify keyword alignment before submitting your application.
+                </p>
+            </div>
+
+            <div class="jd-box-container">
+                <div class="jd-preset-selector">
+                    <span class="jd-preset-label">Sample Target Roles:</span>
+                    <button type="button" class="jd-preset-btn active" data-preset="stripe">Stripe (Staff Platform)</button>
+                    <button type="button" class="jd-preset-btn" data-preset="anthropic">Anthropic (Full Stack AI)</button>
+                    <button type="button" class="jd-preset-btn" data-preset="vercel">Vercel (Cloud Infrastructure)</button>
+                </div>
+
+                <div class="jd-split-workspace">
+                    <div class="jd-input-card">
+                        <label for="jdTextarea" style="font-size:0.875rem; font-weight:700; margin-bottom:0.5rem; display:block;">
+                            Target Job Description
+                        </label>
+                        <textarea id="jdTextarea" class="jd-textarea" placeholder="Paste job requirements here..."></textarea>
+                        <button type="button" class="btn btn-primary" id="btnRunJdMatch" style="margin-top:auto;">
+                            Run Match Analysis →
+                        </button>
+                    </div>
+
+                    <div class="jd-results-card">
+                        <div class="jd-match-meter">
+                            <div class="jd-big-score" id="jdMatchScore">0%</div>
+                            <div>
+                                <div class="jd-score-label">Role Compatibility</div>
+                                <div style="font-size:0.8125rem; color:var(--text-muted);" id="jdRoleTitle">Stripe • Staff Platform</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <div style="font-size:0.8125rem; font-weight:700; color:var(--text-secondary); margin-bottom:0.4rem;">Matching Keywords:</div>
+                            <div class="tag-cloud" id="jdMatchedPills"></div>
+                        </div>
+
+                        <div style="margin-bottom:1rem;">
+                            <div style="font-size:0.8125rem; font-weight:700; color:var(--danger); margin-bottom:0.4rem;">Missing Critical Keywords:</div>
+                            <div class="tag-cloud" id="jdMissingPills"></div>
+                        </div>
+
+                        <div style="font-size:0.8125rem; color:var(--text-muted); line-height:1.5; margin-top:auto; padding-top:0.75rem; border-top:1px solid var(--border-light);" id="jdRecommendation">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Call To Action Banner
+         ====================================================================== -->
+    <section class="section cta-section">
+        <div class="container">
+            <h2 class="cta-title">Ready to 10x Your Interview Callback Rate?</h2>
+            <p class="cta-subtitle">
+                Join thousands of software engineers, product managers, and leaders who have optimized their resumes with our AI engine.
+            </p>
+            <div class="cta-actions">
+                <a href="#upload" class="btn btn-cta-white">
+                    Upload Resume & Analyze Free →
+                </a>
+                <a href="login.html" class="btn btn-secondary" style="background:rgba(255,255,255,0.15); color:white; border-color:rgba(255,255,255,0.3);">
+                    Create Free Account
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================================================
+         Footer
+         ====================================================================== -->
+    <footer class="site-footer" id="about">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="brand" style="color:white;">
+                        <div class="brand-icon">AI</div>
+                        <div class="brand-text">Resume<span style="color:#818cf8;">Analyzer</span></div>
+                    </div>
+                    <p class="footer-brand-desc">
+                        Enterprise-grade AI resume scoring, ATS compliance diagnostics, and career trajectory intelligence.
+                    </p>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Platform</h5>
+                    <ul>
+                        <li><a href="#features">ATS Parser</a></li>
+                        <li><a href="#upload">Resume Upload</a></li>
+                        <li><a href="#analysis">Live Dashboard</a></li>
+                        <li><a href="#before-after">Bullet Optimizer</a></li>
+                        <li><a href="#match-jd">JD Matcher</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Resources</h5>
+                    <ul>
+                        <li><a href="login.html">Candidate Portal</a></li>
+                        <li><a href="#before-after">Google XYZ Formula</a></li>
+                        <li><a href="#features">ATS Architecture</a></li>
+                        <li><a href="#how-it-works">Security & Privacy</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h5>Project Info</h5>
+                    <ul>
+                        <li><span style="color:#94a3b8; font-size:0.875rem;">Backend: Python API Ready</span></li>
+                        <li><span style="color:#94a3b8; font-size:0.875rem;">Frontend: Vanilla ES6+ & CSS Tokens</span></li>
+                        <li><span style="color:#94a3b8; font-size:0.875rem;">Status: Production Showcase</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>© 2026 AI Resume Analyzer • Production AI SaaS Portfolio Showcase</span>
+                <span>Designed for Senior Engineering & High-Growth Career Platforms</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Master Application Script -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

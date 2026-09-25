@@ -1,0 +1,522 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Resume Analyser</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="navbar">
+
+    <div class="logo">
+        <div class="logo-box">AI</div>
+        <span>Resume<span class="purple">Analyser</span></span>
+    </div>
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#about">About</a>
+    </nav>
+
+    <div class="nav-buttons">
+        <button class="login">Login</button>
+        <button class="get-started"
+                onclick="scrollToUpload()">
+            Get Started
+        </button>
+    </div>
+
+</header>
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero" id="home">
+
+    <div class="hero-left">
+
+        <div class="small-heading">
+            ✦ AI-POWERED RESUME ANALYSIS
+        </div>
+
+        <h1>
+            Your Resume.
+            <br>
+            <span>Smarter. Stronger.</span>
+        </h1>
+
+        <p>
+            Analyse your resume with AI, improve your ATS score,
+            discover missing skills and get personalized career
+            recommendations.
+        </p>
+
+        <div class="hero-buttons">
+
+            <button class="primary-btn"
+                    onclick="scrollToUpload()">
+                Analyse My Resume →
+            </button>
+
+            <button class="secondary-btn"
+                    onclick="scrollToFeatures()">
+                Explore Features
+            </button>
+
+        </div>
+
+        <div class="trust">
+
+            <div>
+                <strong>AI</strong>
+                <span>Powered Analysis</span>
+            </div>
+
+            <div>
+                <strong>ATS</strong>
+                <span>Compatibility Check</span>
+            </div>
+
+            <div>
+                <strong>100%</strong>
+                <span>Project Focused</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Dashboard Preview -->
+
+    <div class="dashboard-preview">
+
+        <div class="preview-header">
+            <span>Resume Analysis</span>
+            <span class="status">● Analysis Complete</span>
+        </div>
+
+        <div class="score-section">
+
+            <div class="score-circle">
+                <span>86</span>
+                <small>/100</small>
+            </div>
+
+            <div>
+                <h3>ATS Resume Score</h3>
+                <p>Your resume has a good ATS compatibility.</p>
+
+                <div class="progress">
+                    <div></div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="preview-grid">
+
+            <div class="mini-card">
+                <span>Skills</span>
+                <strong>12</strong>
+                <small>Detected</small>
+            </div>
+
+            <div class="mini-card">
+                <span>Keywords</span>
+                <strong>82%</strong>
+                <small>Match</small>
+            </div>
+
+            <div class="mini-card">
+                <span>Career Match</span>
+                <strong>92%</strong>
+                <small>Best Role</small>
+            </div>
+
+        </div>
+
+
+        <div class="recommendation">
+
+            <div class="check">✓</div>
+
+            <div>
+                <strong>AI Recommendation</strong>
+                <p>
+                    Add more job-specific keywords and
+                    measurable achievements.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= UPLOAD ================= -->
+
+<section class="upload-section" id="upload">
+
+    <div class="upload-container">
+
+        <div class="upload-heading">
+
+            <span>START YOUR ANALYSIS</span>
+
+            <h2>
+                Find out what your resume
+                <span>is missing.</span>
+            </h2>
+
+            <p>
+                Upload your resume and let our AI analyse
+                your skills, keywords, formatting and ATS
+                compatibility.
+            </p>
+
+        </div>
+
+
+        <div class="upload-box">
+
+            <div class="upload-icon">
+                📄
+            </div>
+
+            <h3>Upload your resume</h3>
+
+            <p>
+                Drag & drop your resume here or choose a file
+            </p>
+
+            <input
+                type="file"
+                id="resumeFile"
+                accept=".pdf,.doc,.docx"
+            >
+
+            <label for="resumeFile" class="choose-btn">
+                Choose Resume
+            </label>
+
+            <div id="fileName">
+                PDF or DOCX
+            </div>
+
+            <button class="analyse-btn"
+                    onclick="analyseResume()">
+                Analyse Resume →
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FEATURES ================= -->
+
+<section class="features" id="features">
+
+    <div class="section-label">
+        WHY USE OUR SYSTEM?
+    </div>
+
+    <h2>
+        Everything you need to
+        <span>improve your resume.</span>
+    </h2>
+
+    <p class="section-description">
+        Our AI Resume Analyser checks your resume from
+        multiple perspectives and gives actionable feedback.
+    </p>
+
+
+    <div class="feature-grid">
+
+        <div class="feature-card">
+
+            <div class="feature-icon purple-bg">
+                🤖
+            </div>
+
+            <h3>AI Resume Analysis</h3>
+
+            <p>
+                Automatically analyse resume content,
+                structure and quality using AI.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon blue-bg">
+                📊
+            </div>
+
+            <h3>ATS Score</h3>
+
+            <p>
+                Check how compatible your resume is
+                with Applicant Tracking Systems.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon green-bg">
+                🔎
+            </div>
+
+            <h3>Skill Gap Analysis</h3>
+
+            <p>
+                Identify missing technical skills and
+                keywords required for your target role.
+            </p>
+
+        </div>
+
+
+        <div class="feature-card">
+
+            <div class="feature-icon orange-bg">
+                💼
+            </div>
+
+            <h3>Career Recommendation</h3>
+
+            <p>
+                Get suitable job roles based on your
+                resume and detected skills.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= HOW IT WORKS ================= -->
+
+<section class="how-it-works" id="how-it-works">
+
+    <div class="section-label">
+        SIMPLE WORKFLOW
+    </div>
+
+    <h2>
+        How <span>AI Resume Analyser</span> works
+    </h2>
+
+    <div class="steps">
+
+        <div class="step">
+
+            <div class="step-number">01</div>
+
+            <h3>Upload Resume</h3>
+
+            <p>
+                Upload your PDF or DOCX resume.
+            </p>
+
+        </div>
+
+
+        <div class="line"></div>
+
+
+        <div class="step">
+
+            <div class="step-number">02</div>
+
+            <h3>AI Processing</h3>
+
+            <p>
+                AI extracts and analyses your resume data.
+            </p>
+
+        </div>
+
+
+        <div class="line"></div>
+
+
+        <div class="step">
+
+            <div class="step-number">03</div>
+
+            <h3>ATS Analysis</h3>
+
+            <p>
+                System calculates ATS score and identifies gaps.
+            </p>
+
+        </div>
+
+
+        <div class="line"></div>
+
+
+        <div class="step">
+
+            <div class="step-number">04</div>
+
+            <h3>Get Recommendations</h3>
+
+            <p>
+                Receive personalized improvements and career roles.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= PROJECT BENEFITS ================= -->
+
+<section class="benefits">
+
+    <div class="benefit-text">
+
+        <div class="section-label">
+            SMARTER RESUME BUILDING
+        </div>
+
+        <h2>
+            Turn your resume into
+            <span>a career advantage.</span>
+        </h2>
+
+        <p>
+            Instead of guessing whether your resume is good enough,
+            use data-driven AI feedback to understand what works
+            and what needs improvement.
+        </p>
+
+        <div class="benefit-list">
+
+            <div>✓ Identify resume strengths</div>
+
+            <div>✓ Detect missing keywords</div>
+
+            <div>✓ Improve ATS compatibility</div>
+
+            <div>✓ Discover suitable career roles</div>
+
+        </div>
+
+    </div>
+
+
+    <div class="benefit-card">
+
+        <div class="card-title">
+            Resume Health
+        </div>
+
+        <div class="health-score">
+            86%
+        </div>
+
+        <div class="health-text">
+            Good Resume
+        </div>
+
+        <div class="health-item">
+            <span>Content Quality</span>
+            <strong>90%</strong>
+        </div>
+
+        <div class="health-item">
+            <span>ATS Compatibility</span>
+            <strong>86%</strong>
+        </div>
+
+        <div class="health-item">
+            <span>Keyword Match</span>
+            <strong>82%</strong>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CTA ================= -->
+
+<section class="cta">
+
+    <h2>
+        Ready to improve your resume?
+    </h2>
+
+    <p>
+        Upload your resume and discover what you can improve.
+    </p>
+
+    <button onclick="scrollToUpload()">
+        Analyse My Resume →
+    </button>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <div class="footer-logo">
+        <div class="logo-box">AI</div>
+        <strong>Resume Analyser</strong>
+    </div>
+
+    <p>
+        AI-powered resume analysis and career recommendation system.
+    </p>
+
+    <div class="footer-links">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#about">About</a>
+    </div>
+
+    <hr>
+
+    <p class="copyright">
+        © 2026 AI Resume Analyser | Academic Mini Project
+    </p>
+
+</footer>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
+```
