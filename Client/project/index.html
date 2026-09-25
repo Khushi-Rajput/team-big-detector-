@@ -439,10 +439,10 @@
 
             <div class="upload-card-container">
                 <div class="dropzone" id="resumeDropzone">
-                    <input type="file" id="resumeFileInput" class="file-input-hidden" accept=".pdf,.doc,.docx" aria-label="Upload resume file">
+                    <input type="file" id="resumeFileInput" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt" aria-label="Upload resume file">
                     <div class="dropzone-icon">📄</div>
                     <h3 class="dropzone-title">Drag & drop your resume here</h3>
-                    <p class="dropzone-subtitle">Supported formats: PDF, DOCX, or DOC (Max 10MB)</p>
+                    <p class="dropzone-subtitle">Supported formats: PDF, DOCX, DOC, or TXT (Max 10MB)</p>
                     <button type="button" class="btn btn-primary" onclick="document.getElementById('resumeFileInput').click()">
                         Select Resume File
                     </button>
@@ -830,7 +830,7 @@
         </div>
     </footer>
 
-    <!-- Master Application Script -->
-    <script type="module" src="js/main.js"></script>
+    <!-- Master Application Script (Universal Bundle for http://, https://, and local file:///) -->
+    <script src="js/bundle.js"></script>
 </body>
 </html>

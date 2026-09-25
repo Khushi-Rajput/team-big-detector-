@@ -28,7 +28,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 DATABASE = os.path.join(BASE_DIR, "resume_analyzer.db")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-ALLOWED_EXTENSIONS = {"pdf", "txt"}
+ALLOWED_EXTENSIONS = {"pdf", "txt", "docx", "doc"}
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -157,6 +157,25 @@ def extract_pdf_text(file_path):
         return text.strip()
     except Exception as e:
         print(f"PDF extraction error: {e}")
+        return ""
+
+
+def extract_docx_text(file_path):
+    try:
+        import zipfile
+        import xml.etree.ElementTree as ET
+        with zipfile.ZipFile(file_path) as z:
+            xml_content = z.read("word/document.xml")
+            tree = ET.fromstring(xml_content)
+            paragraphs = []
+            for node in tree.iter():
+                if node.tag.endswith("}p"):
+                    text = "".join(node.itertext()).strip()
+                    if text:
+                        paragraphs.append(text)
+            return "\n".join(paragraphs)
+    except Exception as e:
+        print(f"DOCX extraction error: {e}")
         return ""
 
 
@@ -868,7 +887,7 @@ def analyze():
         return jsonify({"error": "Empty filename submitted"}), 400
 
     if not allowed_file(resume_file.filename):
-        return jsonify({"error": "Only PDF and TXT files are supported"}), 400
+        return jsonify({"error": "Only PDF, DOCX, DOC, and TXT files are supported"}), 400
 
     user_id = request.form.get("user_id")
     try:
@@ -888,6 +907,16 @@ def analyze():
         if ext == "txt":
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 resume_text = f.read()
+        elif ext in ["docx", "doc"]:
+            resume_text = extract_docx_text(file_path)
+            if not resume_text:
+                try:
+                    with open(file_path, "rb") as f:
+                        raw = f.read()
+                    words = re.findall(b"[\x20-\x7E]{4,}", raw)
+                    resume_text = " ".join(w.decode("latin1", errors="ignore") for w in words)
+                except Exception:
+                    resume_text = ""
         else:
             resume_text = extract_pdf_text(file_path)
 
