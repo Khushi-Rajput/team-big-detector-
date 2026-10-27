@@ -50,7 +50,7 @@ This deploys both the React Frontend and Flask Backend together in a single free
    ```
 
 2. **Go to [Render.com](https://render.com) and create a New Web Service:**
-   - Connect your GitHub repository: `Khushi-Rajput/team-big-detector-`
+   - Connect your GitHub repository: `Khushi-Rajput/AI-resume-analyser`
    - **Environment:** `Python 3`
    - **Region:** Any (e.g. Frankfurt, Oregon, Singapore)
    - **Branch:** `main`

@@ -1,5 +1,5 @@
 {
-  "name": "ai-resume-checker-fullstack",
+  "name": "ai-resume-analyser",
   "version": "1.0.0",
   "private": true,
   "description": "Full-stack AI Resume Checker with ATS scoring, version control, AI rewrites, and modern React UI",
