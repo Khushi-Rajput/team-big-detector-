@@ -1,0 +1,11 @@
+{
+  "name": "ai-resume-checker-fullstack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack AI Resume Checker with ATS scoring, version control, AI rewrites, and modern React UI",
+  "scripts": {
+    "dev": "npm --prefix Client run dev",
+    "build": "npm --prefix Client run build",
+    "start": "python Server/app.py"
+  }
+}

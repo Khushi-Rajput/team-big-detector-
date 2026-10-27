@@ -26,6 +26,10 @@ app = Flask(__name__, static_folder=CLIENT_DIR)
 # Comprehensive CORS setup to allow all methods, origins and headers
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
+# Register modern v2 API blueprint
+from v2_api import v2_bp, init_v2_db
+app.register_blueprint(v2_bp)
+
 DATABASE = os.path.join(BASE_DIR, "resume_analyzer.db")
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 ALLOWED_EXTENSIONS = {"pdf", "txt", "docx", "doc"}
@@ -33,14 +37,16 @@ ALLOWED_EXTENSIONS = {"pdf", "txt", "docx", "doc"}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # =========================================================
-# OPENAI CONFIGURATION
+# AI CONFIGURATION (GOOGLE GEMINI & OPENAI)
 # =========================================================
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", os.getenv("GOOGLE_API_KEY", "")).strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash").strip()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip()
 
 client = None
-# Only initialize OpenAI client if a non-placeholder key is provided
 if OPENAI_API_KEY and not OPENAI_API_KEY.lower().startswith("your_") and not OPENAI_API_KEY.lower().startswith("sk-placeholder"):
     try:
         from openai import OpenAI
@@ -48,6 +54,35 @@ if OPENAI_API_KEY and not OPENAI_API_KEY.lower().startswith("your_") and not OPE
     except Exception as e:
         print(f"[Warning] Failed to initialize OpenAI client: {e}")
         client = None
+
+
+def call_gemini_api(prompt_text):
+    """Direct lightweight REST call to Google Gemini API (zero external SDK bloat)."""
+    if not GEMINI_API_KEY or GEMINI_API_KEY.lower().startswith("your_"):
+        return None
+    import urllib.request
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={GEMINI_API_KEY}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt_text}]}],
+        "generationConfig": {
+            "temperature": 0.2,
+            "responseMimeType": "application/json"
+        }
+    }
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=12) as res:
+            res_data = json.loads(res.read().decode("utf-8"))
+            text_out = res_data["candidates"][0]["content"]["parts"][0]["text"]
+            return clean_json_response(text_out)
+    except Exception as e:
+        print(f"[Warning] Gemini API evaluation call failed: {e}")
+        return None
 
 
 # =========================================================
@@ -342,25 +377,17 @@ def analyze_resume_native_nlp(resume_text, filename=""):
     action_verbs = ["architected", "spearheaded", "developed", "engineered", "optimized", "implemented", "designed", "reduced", "increased", "accelerated", "built", "led"]
     verb_count = sum(1 for v in action_verbs if v in lower_text)
 
-    # 4. Multi-Dimensional ATS Scoring
-    base_score = 75
-    if has_contact: base_score += 5
-    if has_summary: base_score += 3
-    if has_experience: base_score += 4
-    if has_education: base_score += 3
-    if has_skills_section: base_score += 3
-    if has_good_metrics: base_score += 4
-    if verb_count >= 4: base_score += 3
+    # 4. Multi-Dimensional ATS Scoring via Rigorous ATS Engine
+    from ats_engine import calculate_rigorous_ats_score
+    eval_result = calculate_rigorous_ats_score(resume_text, filename)
+    overall_score = eval_result["atsScore"]
 
-    skills_bonus = min(len(detected_skills), 14) * 0.8
-    overall_score = min(int(base_score + skills_bonus), 96)
-
-    ats_compatibility = min(overall_score + 4, 98) if has_contact and has_skills_section else 82
-    keyword_match = min(overall_score - 2, 92)
+    ats_compatibility = overall_score
+    keyword_match = next((b["value"] for b in eval_result["scoreBreakdown"] if b["label"] == "Keywords"), 65)
     skills_match = min(overall_score + 2, 95)
-    structure_score = 94 if (has_summary and has_experience and has_education) else 80
-    impact_score = 88 if has_good_metrics else 72
-    readability_score = 92
+    structure_score = next((b["value"] for b in eval_result["scoreBreakdown"] if b["label"] == "Format"), 70)
+    impact_score = next((b["value"] for b in eval_result["scoreBreakdown"] if b["label"] == "Impact"), 60)
+    readability_score = next((b["value"] for b in eval_result["scoreBreakdown"] if b["label"] == "Readability"), 75)
 
     # 5. ATS Breakdown Checklist
     ats_breakdown = [
@@ -576,21 +603,19 @@ def analyze_resume_native_nlp(resume_text, filename=""):
 
 def analyze_resume_with_ai(resume_text, filename=""):
     """
-    Analyzes resume text using OpenAI if configured; gracefully falls back to the native NLP engine.
+    Analyzes resume text using Gemini AI or OpenAI with calibrated ATS grading;
+    gracefully falls back to the deterministic ATS NLP engine.
     """
-    # 1. First build the high-precision native analysis
+    # 1. First build the high-precision calibrated native analysis (provides baseline 0-100 score)
     native_analysis = analyze_resume_native_nlp(resume_text, filename)
+    baseline_score = native_analysis["scores"]["overallScore"]
 
-    # 2. If OpenAI client is not available, immediately return native result
-    if not client:
-        return native_analysis
-
-    # 3. Enhance with OpenAI
+    # 2. Strict calibrated prompt instructing the AI model to discriminate bad vs good resumes
     prompt = f"""
-You are an expert AI Resume Analyzer and ATS Evaluation System.
-Analyze the following resume text and return ONLY valid JSON matching this schema:
+You are a senior ATS Evaluation Engine and Recruiter.
+Analyze the following resume and return strictly valid JSON matching this schema:
 {{
-    "score": 88,
+    "score": <integer from 10 to 100>,
     "name": "Candidate Name",
     "role": "Inferred Professional Role",
     "email": "candidate@email.com",
@@ -605,31 +630,53 @@ Analyze the following resume text and return ONLY valid JSON matching this schem
     "ats_keywords": ["Keyword1", "Keyword2"]
 }}
 
+SCORING CRITERIA (MANDATORY TO PREVENT OVER-SCORING):
+- 20–45: Poor/Incomplete. No quantifiable metrics, generic career objective, under 150 words, or lacks real work experience.
+- 50–68: Average/Mediocre. Lists duties without measurable business outcomes (no %, $, numbers), weak action verbs.
+- 70–84: Good/Competitive. Strong projects, clear skills taxonomy, reverse-chronological timeline.
+- 85–98: Top-Tier/Outstanding. Multiple quantifiable metrics (Google XYZ formula), decisive leadership verbs, verified modern stack.
+(Heuristic baseline calculated for this text is: {baseline_score}/100. Do not give 80+ if metrics and experience are lacking!)
+
 Resume Text:
 --------------------
 {resume_text[:4000]}
 --------------------
 """
 
-    try:
-        # Standard chat completions call compatible across all OpenAI versions
-        response = client.chat.completions.create(
-            model=OPENAI_MODEL,
-            messages=[
-                {"role": "system", "content": "You are a professional ATS resume parser that responds strictly in valid JSON."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.2,
-            max_tokens=1500
-        )
-        content = response.choices[0].message.content
-        ai_data = clean_json_response(content)
+    ai_data = None
 
-        # Merge AI insights into native schema
+    # 3. Try Google Gemini AI first if configured
+    if GEMINI_API_KEY and not GEMINI_API_KEY.lower().startswith("your_"):
+        ai_data = call_gemini_api(prompt)
+
+    # 4. Try OpenAI if Gemini not configured or failed
+    if not ai_data and client:
+        try:
+            response = client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": "You are a professional ATS resume parser that responds strictly in valid JSON."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.2,
+                max_tokens=1500
+            )
+            content = response.choices[0].message.content
+            ai_data = clean_json_response(content)
+        except Exception as e:
+            print(f"[Warning] OpenAI API call failed: {e}")
+            ai_data = None
+
+    # If no AI API was available or called, return native analysis
+    if not ai_data:
+        return native_analysis
+
+    # 5. Merge AI insights into native schema
+    try:
         if "score" in ai_data and isinstance(ai_data["score"], (int, float)):
-            ai_score = int(ai_data["score"])
+            ai_score = max(15, min(int(ai_data["score"]), 98))
             native_analysis["scores"]["overallScore"] = ai_score
-            native_analysis["scores"]["atsCompatibility"] = min(ai_score + 3, 98)
+            native_analysis["scores"]["atsCompatibility"] = ai_score
             native_analysis["score"] = ai_score
 
         if ai_data.get("name"):
@@ -647,17 +694,27 @@ Resume Text:
             native_analysis["profile"]["phone"] = ai_data["phone"]
             native_analysis["phone"] = ai_data["phone"]
 
+        if ai_data.get("skills") and isinstance(ai_data["skills"], list):
+            native_analysis["skills"] = ai_data["skills"]
+
         if ai_data.get("strengths") and isinstance(ai_data["strengths"], list):
-            native_analysis["strengths"] = [{"title": s, "detail": s} if isinstance(s, str) else s for s in ai_data["strengths"][:4]]
+            native_analysis["strengths"] = [
+                {"title": s, "detail": s} if isinstance(s, str) else s
+                for s in ai_data["strengths"]
+            ]
 
         if ai_data.get("weaknesses") and isinstance(ai_data["weaknesses"], list):
-            native_analysis["weaknesses"] = [{"title": w, "detail": w, "severity": "medium"} if isinstance(w, str) else w for w in ai_data["weaknesses"][:4]]
+            native_analysis["weaknesses"] = [
+                {"title": w, "detail": w, "severity": "medium"} if isinstance(w, str) else w
+                for w in ai_data["weaknesses"]
+            ]
 
-        return native_analysis
+        if ai_data.get("suggestions") and isinstance(ai_data["suggestions"], list):
+            native_analysis["suggestions"] = ai_data["suggestions"]
+    except Exception as e:
+        print(f"[Warning] Failed to merge AI response: {e}")
 
-    except Exception as err:
-        print(f"[Notice] OpenAI analysis unavailable ({err}), using resilient native engine.")
-        return native_analysis
+    return native_analysis
 
 
 def match_resume_with_jd_native(job_description, resume_summary="", candidate_skills=None):
@@ -747,33 +804,36 @@ def match_resume_with_jd_native(job_description, resume_summary="", candidate_sk
 # FLASK ROUTE: STATIC CLIENT SERVING
 # =========================================================
 
-@app.route("/", methods=["GET"])
-def index():
-    # If API client explicitly requests JSON, return health status
-    if request.headers.get("Accept") == "application/json" and not request.headers.get("Sec-Fetch-Mode") == "navigate":
-        return jsonify({
-            "message": "AI Resume Analyzer API is running",
-            "status": "success",
-            "version": "2.6.0",
-            "ai_engine": "OpenAI API" if client else "Native NLP Engine (Ready)"
-        })
+DIST_DIR = os.path.join(CLIENT_DIR, "dist")
 
-    index_path = os.path.join(CLIENT_DIR, "index.html")
-    if os.path.exists(index_path):
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_spa(path):
+    # Prevent catching API endpoints
+    if path.startswith("api/") or path in ["health", "login", "register", "analyze", "match-resume", "optimize-bullet", "resumes"]:
+        return jsonify({"error": "Endpoint not found"}), 404
+
+    # 1. Direct static asset in dist (e.g. dist/assets/index.js)
+    if os.path.exists(DIST_DIR):
+        target_file = os.path.join(DIST_DIR, path)
+        if path and os.path.exists(target_file) and not os.path.isdir(target_file):
+            return send_from_directory(DIST_DIR, path)
+
+        # 2. SPA entrypoint: dist/index.html
+        index_file = os.path.join(DIST_DIR, "index.html")
+        if os.path.exists(index_file):
+            return send_from_directory(DIST_DIR, "index.html")
+
+    # 3. Fallback to Client root
+    target_legacy = os.path.join(CLIENT_DIR, path)
+    if path and os.path.exists(target_legacy) and not os.path.isdir(target_legacy):
+        return send_from_directory(CLIENT_DIR, path)
+
+    fallback_index = os.path.join(CLIENT_DIR, "index.html")
+    if os.path.exists(fallback_index):
         return send_from_directory(CLIENT_DIR, "index.html")
-    return jsonify({
-        "message": "AI Resume Analyzer API is running",
-        "status": "success"
-    })
 
-
-@app.route("/<path:filename>")
-def serve_client_file(filename):
-    # Security: check if file exists in CLIENT_DIR
-    target_file = os.path.join(CLIENT_DIR, filename)
-    if os.path.exists(target_file) and not os.path.isdir(target_file):
-        return send_from_directory(CLIENT_DIR, filename)
-    return jsonify({"error": "File not found"}), 404
+    return jsonify({"message": "AI Resume Analyzer is running", "status": "success"})
 
 
 # =========================================================
@@ -783,12 +843,16 @@ def serve_client_file(filename):
 @app.route("/health", methods=["GET"])
 @app.route("/api/health", methods=["GET"])
 def health():
+    active_ai = (
+        f"Google Gemini AI ({GEMINI_MODEL})" if (GEMINI_API_KEY and not GEMINI_API_KEY.lower().startswith("your_"))
+        else (f"OpenAI API ({OPENAI_MODEL})" if client else "Production ATS Engine (Self-Contained & Calibrated)")
+    )
     return jsonify({
         "status": "running",
         "database": "SQLite (resume_analyzer.db)",
-        "ai": "OpenAI API" if client else "Native NLP Engine (Self-Contained)",
-        "model": OPENAI_MODEL if client else "Native Heuristic NLP",
-        "version": "2.6.0"
+        "ai": active_ai,
+        "engine": "Gemini AI" if (GEMINI_API_KEY and not GEMINI_API_KEY.lower().startswith("your_")) else ("OpenAI" if client else "Deterministic ATS Engine"),
+        "version": "3.0.0"
     })
 
 
@@ -1191,6 +1255,7 @@ def get_history(user_id):
 
 if __name__ == "__main__":
     init_db()
+    init_v2_db()
 
     print("=" * 60)
     print("   AI RESUME ANALYZER - FULL STACK PRODUCTION BACKEND   ")
