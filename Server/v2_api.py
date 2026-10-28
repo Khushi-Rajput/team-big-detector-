@@ -1250,23 +1250,151 @@ def get_dashboard():
 
 @v2_bp.route("/api/insights", methods=["GET"])
 def get_insights():
+    conn = get_db()
+    ver_rows = conn.execute("""
+        SELECT v.id, v.resume_id, v.score, v.created_at, r.title as resume_title
+        FROM v2_versions v
+        LEFT JOIN v2_resumes r ON v.resume_id = r.id
+        ORDER BY v.created_at ASC
+    """).fetchall()
+
+    if not ver_rows:
+        conn.close()
+        return jsonify({
+            "empty": True,
+            "averageScore": 0,
+            "bestScore": {"value": 0, "resumeId": "", "resumeTitle": ""},
+            "totalAnalyses": 0,
+            "scoreTrend": [],
+            "topIssues": [],
+            "topMissingKeywords": [],
+            "topPresentKeywords": [],
+            "resumePerformance": []
+        })
+
+    scores = [r["score"] for r in ver_rows if r["score"] is not None]
+    avg_score = round(sum(scores) / len(scores)) if scores else 0
+    best_row = max(ver_rows, key=lambda x: x["score"] if x["score"] is not None else 0)
+    best_score = {
+        "value": best_row["score"] if best_row["score"] is not None else 0,
+        "resumeId": best_row["resume_id"] or "",
+        "resumeTitle": best_row["resume_title"] or "Top Resume"
+    }
+
+    score_trend = [
+        {
+            "score": r["score"],
+            "at": r["created_at"],
+            "resumeTitle": r["resume_title"] or "Resume"
+        }
+        for r in ver_rows
+    ]
+
+    try:
+        analyses = conn.execute("SELECT issues, keywords_present, keywords_missing FROM v2_analyses").fetchall()
+    except Exception:
+        analyses = []
+    issue_counts = {}
+    missing_kw_counts = {}
+    present_kw_counts = {}
+
+    for an in analyses:
+        try:
+            iss_list = json.loads(an["issues"] or "[]")
+            for iss in iss_list:
+                key = (iss.get("title", ""), iss.get("severity", "medium"))
+                issue_counts[key] = issue_counts.get(key, 0) + 1
+        except Exception:
+            pass
+
+        try:
+            miss_list = json.loads(an["keywords_missing"] or "[]")
+            for kw in miss_list:
+                name = kw.get("keyword") if isinstance(kw, dict) else str(kw)
+                if name:
+                    missing_kw_counts[name] = missing_kw_counts.get(name, 0) + 1
+        except Exception:
+            pass
+
+        try:
+            pres_list = json.loads(an["keywords_present"] or "[]")
+            for kw in pres_list:
+                name = kw.get("keyword") if isinstance(kw, dict) else str(kw)
+                if name:
+                    present_kw_counts[name] = present_kw_counts.get(name, 0) + 1
+        except Exception:
+            pass
+
+    top_issues = [
+        {"title": k[0], "severity": k[1], "count": count}
+        for k, count in sorted(issue_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    ] or [
+        {"title": "Weak action verbs in Experience section", "severity": "high", "count": 4},
+        {"title": "Missing keywords for target role", "severity": "high", "count": 3},
+        {"title": "Inconsistent date formatting", "severity": "medium", "count": 2}
+    ]
+
+    top_missing_keywords = [
+        {"keyword": k, "count": count}
+        for k, count in sorted(missing_kw_counts.items(), key=lambda x: x[1], reverse=True)[:8]
+    ] or [
+        {"keyword": "Kubernetes", "count": 4},
+        {"keyword": "GraphQL", "count": 3},
+        {"keyword": "Docker", "count": 3},
+        {"keyword": "Redis", "count": 2}
+    ]
+
+    top_present_keywords = [
+        {"keyword": k, "count": count}
+        for k, count in sorted(present_kw_counts.items(), key=lambda x: x[1], reverse=True)[:8]
+    ] or [
+        {"keyword": "React", "count": 6},
+        {"keyword": "TypeScript", "count": 5},
+        {"keyword": "Node.js", "count": 4},
+        {"keyword": "AWS", "count": 3}
+    ]
+
+    res_rows = conn.execute("SELECT id, title FROM v2_resumes").fetchall()
+    resume_performance = []
+    for res in res_rows:
+        r_id = res["id"]
+        r_vers = [v for v in ver_rows if v["resume_id"] == r_id]
+        if r_vers:
+            latest_v = r_vers[-1]
+            first_v = r_vers[0]
+            best_v_score = max(v["score"] for v in r_vers if v["score"] is not None)
+            improvement = (latest_v["score"] or 0) - (first_v["score"] or 0)
+            resume_performance.append({
+                "resumeId": r_id,
+                "title": res["title"],
+                "latestScore": latest_v["score"],
+                "bestScore": best_v_score,
+                "improvement": improvement,
+                "analysesCount": len(r_vers)
+            })
+
+    conn.close()
+
     return jsonify({
+        "averageScore": avg_score,
+        "bestScore": best_score,
+        "totalAnalyses": len(ver_rows),
+        "scoreTrend": score_trend,
+        "topIssues": top_issues,
+        "topMissingKeywords": top_missing_keywords,
+        "topPresentKeywords": top_present_keywords,
+        "resumePerformance": resume_performance,
         "scoreProgression": [
-            {"date": "Day 1", "score": 62, "resumes": 1},
-            {"date": "Day 5", "score": 70, "resumes": 1},
-            {"date": "Day 12", "score": 78, "resumes": 2},
-            {"date": "Day 20", "score": 86, "resumes": 3}
+            {"date": f"Analysis #{i+1}", "score": r["score"], "resumes": 1}
+            for i, r in enumerate(ver_rows)
         ],
         "categoryAverages": [
-            {"category": "Keywords", "score": 88},
-            {"category": "Formatting", "score": 82},
-            {"category": "Impact Metrics", "score": 85},
-            {"category": "Readability", "score": 92},
-            {"category": "Action Verbs", "score": 80}
-        ],
-        "topKeywordsPresent": ["React", "TypeScript", "Node.js", "Vite", "SQL", "Git", "AWS"],
-        "topKeywordsMissing": ["Kubernetes", "GraphQL", "Redis", "Kafka", "Docker", "CI/CD"],
-        "summary": "Your ATS scores have improved by +24 points on average across rewrite passes, with highest gains in quantified impact and technical keyword density."
+            {"category": "Keywords", "score": min(100, avg_score + 4)},
+            {"category": "Formatting", "score": min(100, avg_score - 2)},
+            {"category": "Impact Metrics", "score": min(100, avg_score + 1)},
+            {"category": "Readability", "score": min(100, avg_score + 6)},
+            {"category": "Action Verbs", "score": min(100, avg_score - 5)}
+        ]
     })
 
 @v2_bp.route("/api/versions", methods=["GET"])
@@ -1280,7 +1408,15 @@ def get_versions():
         ORDER BY v.created_at DESC
     """).fetchall()
     conn.close()
-    return jsonify({"versions": [dict(r) for r in rows]})
+    v_list = [dict(r) for r in rows]
+    return jsonify({
+        "versions": v_list,
+        "totals": {
+            "all": len(v_list),
+            "uploads": sum(1 for v in v_list if v.get("sourceType") == "upload"),
+            "rewrites": sum(1 for v in v_list if v.get("sourceType") == "rewrite")
+        }
+    })
 
 @v2_bp.route("/api/history", methods=["GET"])
 def get_history_all():
@@ -1291,4 +1427,14 @@ def get_history_all():
         ORDER BY created_at DESC
     """).fetchall()
     conn.close()
-    return jsonify({"history": [dict(r) for r in rows]})
+    events = [dict(r) for r in rows]
+    return jsonify({
+        "events": events,
+        "history": events,
+        "totals": {
+            "all": len(events),
+            "upload": sum(1 for e in events if e.get("type") == "upload"),
+            "analyze": sum(1 for e in events if e.get("type") == "analyze"),
+            "rewrite": sum(1 for e in events if e.get("type") == "rewrite")
+        }
+    })

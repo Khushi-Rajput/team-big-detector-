@@ -47,7 +47,7 @@ export default function Insights() {
     );
   }
 
-  if (data?.empty) {
+  if (data?.empty || (!data?.scoreTrend?.length && !data?.resumePerformance?.length && !data?.bestScore)) {
     return (
       <div className="space-y-6">
         <PageHeader
@@ -68,12 +68,19 @@ export default function Insights() {
     );
   }
 
-  const trend = (data.scoreTrend || []).map((p, i) => ({
+  const trend = (data?.scoreTrend || []).map((p, i) => ({
     label: `#${i + 1}`,
-    score: p.score,
-    at: p.at,
-    resumeTitle: p.resumeTitle,
+    score: p?.score ?? 0,
+    at: p?.at,
+    resumeTitle: p?.resumeTitle || "Resume",
   }));
+
+  const topIssues = data?.topIssues || [];
+  const topMissingKeywords = data?.topMissingKeywords || [];
+  const topPresentKeywords = data?.topPresentKeywords || [];
+  const resumePerformance = data?.resumePerformance || [];
+  const bestScoreVal = data?.bestScore?.value ?? 0;
+  const bestScoreTitle = data?.bestScore?.resumeTitle || "Top Resume";
 
   return (
     <div className="space-y-6">
@@ -86,21 +93,21 @@ export default function Insights() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <Kpi
           label="Average ATS Score"
-          value={data.averageScore}
+          value={data?.averageScore ?? 0}
           suffix="/ 100"
           icon={TrendingUp}
         />
         <Kpi
           label="Best Score"
-          value={data.bestScore.value}
+          value={bestScoreVal}
           suffix="/ 100"
-          sub={data.bestScore.resumeTitle}
+          sub={bestScoreTitle}
           icon={Trophy}
           accent
         />
         <Kpi
           label="Total Analyses"
-          value={data.totalAnalyses}
+          value={data?.totalAnalyses ?? 0}
           icon={Sparkles}
         />
       </div>
@@ -177,11 +184,11 @@ export default function Insights() {
               </CardDescription>
             </div>
           </CardHeader>
-          {data.topIssues.length === 0 ? (
+          {topIssues.length === 0 ? (
             <p className="text-sm text-[var(--ink-muted)]">No issues recorded yet.</p>
           ) : (
             <div className="space-y-3">
-              {data.topIssues.map((issue, i) => (
+              {topIssues.map((issue, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className="h-8 w-8 rounded-xl bg-[var(--surface-2)] flex items-center justify-center text-[var(--ink-muted)] shrink-0">
                     <AlertCircle size={14} />
@@ -212,13 +219,13 @@ export default function Insights() {
               </CardDescription>
             </div>
           </CardHeader>
-          {data.topMissingKeywords.length === 0 ? (
+          {topMissingKeywords.length === 0 ? (
             <p className="text-sm text-[var(--ink-muted)]">
               Nothing missing across your analyses — nice.
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {data.topMissingKeywords.map((k, i) => (
+              {topMissingKeywords.map((k, i) => (
                 <span
                   key={i}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#F8E3E0] text-[var(--danger)]"
@@ -233,7 +240,7 @@ export default function Insights() {
       </div>
 
       {/* Most-present keywords */}
-      {data.topPresentKeywords?.length > 0 && (
+      {topPresentKeywords?.length > 0 && (
         <Card>
           <CardHeader>
             <div>
@@ -244,7 +251,7 @@ export default function Insights() {
             </div>
           </CardHeader>
           <div className="flex flex-wrap gap-2">
-            {data.topPresentKeywords.map((k, i) => (
+            {topPresentKeywords.map((k, i) => (
               <span
                 key={i}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--accent-soft)] text-[var(--accent-strong)]"
@@ -280,7 +287,7 @@ export default function Insights() {
               </tr>
             </thead>
             <tbody>
-              {data.resumePerformance.map((r) => (
+              {resumePerformance.map((r) => (
                 <tr
                   key={r.resumeId}
                   onClick={() => nav(`/resumes/${r.resumeId}`)}
