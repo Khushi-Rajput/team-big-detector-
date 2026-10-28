@@ -171,6 +171,14 @@ def init_db():
     connection.commit()
     connection.close()
 
+# Auto-initialize both databases on import so Gunicorn / WSGI always has tables ready
+try:
+    init_db()
+    init_v2_db()
+except Exception as _init_err:
+    print(f"[Startup Database Init Note] {_init_err}")
+
+
 
 
 # =========================================================

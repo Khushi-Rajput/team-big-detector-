@@ -1438,3 +1438,9 @@ def get_history_all():
             "rewrite": sum(1 for e in events if e.get("type") == "rewrite")
         }
     })
+
+# Auto-initialize v2 database schema when blueprint module is loaded
+try:
+    init_v2_db()
+except Exception as _e:
+    pass
